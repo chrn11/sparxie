@@ -61,9 +61,14 @@ echo ">>> Building unsigned iOS app"
     CODE_SIGNING_REQUIRED=NO \
     DEVELOPMENT_TEAM=""
 )
-# 从 archive 中提取 .app（后续步骤依赖此路径）
-mkdir -p ../build/ios/iphoneos
-cp -R ../build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app ../build/ios/iphoneos/Runner.app
+# 从 archive 中提取 .app 到 flutter build 期望的路径
+mkdir -p build/ios/iphoneos
+APP_IN_ARCHIVE="$(find build/ios/archive/Runner.xcarchive -name 'Runner.app' -type d | head -n1)"
+if [[ -z "$APP_IN_ARCHIVE" || ! -d "$APP_IN_ARCHIVE" ]]; then
+  echo "No Runner.app found in xcarchive" >&2
+  exit 1
+fi
+cp -R "$APP_IN_ARCHIVE" build/ios/iphoneos/Runner.app
 
 APP_BUNDLE="$(find build/ios/iphoneos -maxdepth 1 -type d -name '*.app' | head -n1)"
 if [[ -z "$APP_BUNDLE" || ! -d "$APP_BUNDLE" ]]; then
