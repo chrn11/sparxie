@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import 'dart:io' show HttpClient, Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -29,6 +29,11 @@ import 'window_state.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 在 iOS 上触发系统的"无线局域网与蜂窝数据"权限弹窗。
+  // Rust reqwest 走原始 TCP 不会触发此弹窗，导致首次启动时
+  // iOS 阻止所有网络请求。此处用 Dart HttpClient 请求苹果官方
+  // 热点检测端点，触发系统权限对话框后即可正常联网。
+  await _triggerNetworkPermission();
   // One shared config.json holds controllers, prefs and window geometry.
   final config = await JsonStore.load();
   // Restore the desktop window's saved size / position / maximized state.
@@ -52,6 +57,31 @@ Future<void> main() async {
     session.setConnectionsInterval(prefs.connectionsRefreshMs);
   });
   runApp(MihomoControllerApp(store: store, prefs: prefs, session: session));
+}
+
+/// 在 iOS 上触发"无线局域网与蜂窝数据"权限弹窗。
+///
+/// iOS 首次启动时，Rust reqwest 走原始 TCP 不会触发系统网络权限弹窗，
+/// 导致所有网络请求被静默拒绝。此处用 Dart HttpClient 请求苹果官方
+/// 热点检测端点 captive.apple.com，触发系统对话框；
+/// 请求本身成功与否无关紧要——副作用（用户授权或拒绝）才是目的。
+///
+/// 非 iOS 平台直接跳过。
+Future<void> _triggerNetworkPermission() async {
+  if (!Platform.isIOS) return;
+  try {
+    final client = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 3);
+    // 任意可达主机都可以；captive.apple.com 是苹果官方热点检测端点，响应快。
+    final request = await client.getUrl(Uri.parse('http://captive.apple.com'));
+    final response = await request.close();
+    // 排空响应体，避免 "connection reset" 警告。
+    await response.drain<void>();
+    client.close();
+  } catch (_) {
+    // 用户尚未授权时请求必定失败——这正是期望的行为：
+    // iOS 弹出对话框，此处报错仅表示"尚未授权"。授权后后续请求即可正常。
+  }
 }
 
 Future<void> _initRust() {

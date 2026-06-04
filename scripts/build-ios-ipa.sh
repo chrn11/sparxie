@@ -47,7 +47,23 @@ echo ">>> Fetching Flutter dependencies"
 flutter pub get
 
 echo ">>> Building unsigned iOS app"
-flutter build ios --release --no-codesign
+# Flutter 3.44 的 --no-codesign 仍强制验证 DEVELOPMENT_TEAM 非空，
+# 改用 xcodebuild 直接构建以绕过 Flutter 的签名后检查。
+(
+  cd ios
+  xcodebuild -workspace Runner.xcworkspace \
+    -scheme Runner \
+    -configuration Release \
+    -destination 'generic/platform=ios' \
+    -archivePath ../build/ios/archive/Runner.xcarchive \
+    archive \
+    CODE_SIGNING_ALLOWED=NO \
+    CODE_SIGNING_REQUIRED=NO \
+    DEVELOPMENT_TEAM=""
+)
+# 从 archive 中提取 .app（后续步骤依赖此路径）
+mkdir -p ../build/ios/iphoneos
+cp -R ../build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app ../build/ios/iphoneos/Runner.app
 
 APP_BUNDLE="$(find build/ios/iphoneos -maxdepth 1 -type d -name '*.app' | head -n1)"
 if [[ -z "$APP_BUNDLE" || ! -d "$APP_BUNDLE" ]]; then
