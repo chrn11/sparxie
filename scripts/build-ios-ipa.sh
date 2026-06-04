@@ -47,28 +47,17 @@ echo ">>> Fetching Flutter dependencies"
 flutter pub get
 
 echo ">>> Building unsigned iOS app"
-# Flutter 3.44 的 --no-codesign 仍强制验证 DEVELOPMENT_TEAM 非空，
-# 改用 xcodebuild 直接构建以绕过 Flutter 的签名后检查。
+# Flutter 3.44 的 --no-codesign 仍强制验证 DEVELOPMENT_TEAM 非空。
+# 通过 xcconfig 注入签名绕过参数，并使用占位 Team ID。
+# 这样 Flutter 的签名前检查能通过，而 Xcode 实际不执行签名。
 (
-  cd ios
-  xcodebuild -workspace Runner.xcworkspace \
-    -scheme Runner \
-    -configuration Release \
-    -destination 'generic/platform=ios' \
-    -archivePath ../build/ios/archive/Runner.xcarchive \
-    archive \
-    CODE_SIGNING_ALLOWED=NO \
-    CODE_SIGNING_REQUIRED=NO \
-    DEVELOPMENT_TEAM=""
+  cat >> ios/Flutter/Release.xcconfig <<'XCEOF'
+CODE_SIGNING_ALLOWED=NO
+CODE_SIGNING_REQUIRED=NO
+DEVELOPMENT_TEAM=0000000000
+XCEOF
 )
-# 从 archive 中提取 .app 到 flutter build 期望的路径
-mkdir -p build/ios/iphoneos
-APP_IN_ARCHIVE="$(find build/ios/archive/Runner.xcarchive -name 'Runner.app' -type d | head -n1)"
-if [[ -z "$APP_IN_ARCHIVE" || ! -d "$APP_IN_ARCHIVE" ]]; then
-  echo "No Runner.app found in xcarchive" >&2
-  exit 1
-fi
-cp -R "$APP_IN_ARCHIVE" build/ios/iphoneos/Runner.app
+flutter build ios --release --no-codesign
 
 APP_BUNDLE="$(find build/ios/iphoneos -maxdepth 1 -type d -name '*.app' | head -n1)"
 if [[ -z "$APP_BUNDLE" || ! -d "$APP_BUNDLE" ]]; then
