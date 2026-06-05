@@ -287,8 +287,9 @@ actor RustCore {
 
     func upgradeCore(target: SparxieTargetHandle, channel: String? = nil, force: Bool = false) async throws {
         try await asyncUnit { callback in
-            channel.withCString { channelC in
-                sparxie_upgrade_core(target.ptr, channelC, force, callback)
+            let channelC = channel ?? ""
+            channelC.withCString { channelPtr in
+                sparxie_upgrade_core(target.ptr, channelPtr, force, callback)
             }
         }
     }
