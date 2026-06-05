@@ -33,6 +33,7 @@ targets:
       - path: Sparxie
         excludes:
           - "**/.DS_Store"
+          - "Info.plist"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sparxie.app
