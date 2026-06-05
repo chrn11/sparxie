@@ -44,7 +44,8 @@ jobs:
             -derivedDataPath build/ios/derivedData \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            DEVELOPMENT_TEAM=0000000000
+            DEVELOPMENT_TEAM=0000000000 \
+            GENERATE_INFOPLIST_FILE=NO
 
       - name: Package IPA
         run: |
