@@ -64,6 +64,6 @@ targets:
           - "Combine"
         GCC_PREPROCESSOR_DEFINITIONS:
           - "SPARXIE_IOS=1"
-        BRIDGING_HEADER: Sparxie/Sparxie/Core/SparxieBridge.h
+        SWIFT_OBJC_BRIDGING_HEADER: Sparxie/Sparxie/Core/SparxieBridge.h
         ENABLE_BITCODE: NO
     dependencies: []

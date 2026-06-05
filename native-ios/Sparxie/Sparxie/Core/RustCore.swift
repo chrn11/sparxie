@@ -214,9 +214,11 @@ actor RustCore {
 
     func reloadConfigs(target: SparxieTargetHandle, path: String? = nil, payload: String? = nil, force: Bool = false) async throws {
         try await asyncUnit { callback in
-            path.withCString { pathC in
-                payload.withCString { payloadC in
-                    sparxie_reload_configs(target.ptr, pathC, payloadC, force, callback)
+            let pathC = path ?? ""
+            let payloadC = payload ?? ""
+            pathC.withCString { pathPtr in
+                payloadC.withCString { payloadPtr in
+                    sparxie_reload_configs(target.ptr, pathPtr, payloadPtr, force, callback)
                 }
             }
         }
