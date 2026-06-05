@@ -15,6 +15,7 @@
 use std::sync::{Mutex, OnceLock};
 
 use reqwest::Method;
+use serde::Serialize;
 use serde_json::Value;
 
 use crate::MihomoError;
@@ -23,21 +24,29 @@ use super::MihomoTarget;
 
 /// One routing rule. `has_extra` is true when the core returned the `extra`
 /// block (hit stats + disable support); it gates the per-rule toggle in the UI.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RuleEntry {
     pub index: u32,
+    #[serde(rename = "type")]
     pub rule_type: String,
     pub payload: String,
     pub proxy: String,
     pub disabled: bool,
     pub hit_count: u64,
     pub miss_count: u64,
+    #[serde(skip_serializing_if = "is_false", default)]
     pub has_extra: bool,
 }
 
-/// Counts returned to Dart after a load or filter change. `total` is the full
+fn is_false(b: &bool) -> bool {
+    !b
+}
+
+/// Counts returned after a load or filter change. `total` is the full
 /// ruleset size; `filtered` is how many survive the current filter.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RulesSummary {
     pub total: u32,
     pub filtered: u32,

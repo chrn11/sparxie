@@ -4,10 +4,12 @@ use serde::{Deserialize, Serialize};
 pub const CLOSED_CAP: usize = 500;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Connection {
     pub id: String,
     pub host: String,
     pub network: String,
+    #[serde(rename = "type")]
     pub conn_type: String,
     pub source_ip: String,
     pub source_port: u32,
@@ -37,6 +39,7 @@ pub struct Connection {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ConnectionsTotals {
     pub upload: u64,
     pub download: u64,
@@ -45,6 +48,7 @@ pub struct ConnectionsTotals {
 
 /// Aggregate of all active connections sharing one process or source IP.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ConnectionGroup {
     pub key: String,
     pub label: String,
@@ -59,6 +63,7 @@ pub struct ConnectionGroup {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ConnectionsFrame {
     pub active_count: u32,
     pub closed_count: u32,
@@ -69,13 +74,15 @@ pub struct ConnectionsFrame {
 
 /// Which list a window slice is drawn from.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum ConnectionsListKind {
     Active,
     Closed,
 }
 
-/// Sort key for the connections list. Mirrors Dart's `ConnectionsSort`.
+/// Sort key for the connections list.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum ConnectionsSort {
     #[default]
     Time,
@@ -86,8 +93,9 @@ pub enum ConnectionsSort {
     Process,
 }
 
-/// Sort key for the process-group list. Mirrors Dart's `ConnectionGroupSort`.
+/// Sort key for the process-group list.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum ConnectionGroupSort {
     #[default]
     Name,

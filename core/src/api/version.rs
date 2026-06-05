@@ -1,9 +1,12 @@
+use serde::Serialize;
+
 use crate::MihomoError;
 
 use super::MihomoTarget;
 use super::backend::{BackendKind, probe_with_client};
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct VersionInfo {
     pub version: String,
     pub is_cmfa: bool,

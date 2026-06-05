@@ -3,6 +3,8 @@ use std::collections::{HashMap, HashSet};
 
 use serde_json::Value;
 
+use serde::Serialize;
+
 use crate::MihomoError;
 use crate::api::MihomoTarget;
 
@@ -22,27 +24,33 @@ pub enum ProxyMemberSort {
     Delay,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProxyCatalog {
     pub groups: Vec<ProxyGroupEntry>,
     pub icon_urls: Vec<String>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProxyGroupEntry {
     pub name: String,
+    #[serde(rename = "type")]
     pub proxy_type: String,
     pub icon: String,
     pub member_count: u32,
     pub members_hash: u32,
     pub now: String,
     pub test_url: String,
+    #[serde(skip_serializing_if = "String::is_empty", default)]
     pub fixed: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProxyMemberEntry {
     pub name: String,
+    #[serde(rename = "type")]
     pub proxy_type: String,
     pub delay: i32,
 }

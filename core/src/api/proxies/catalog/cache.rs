@@ -1,26 +1,21 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::{Mutex, OnceLock};
 
-use flutter_rust_bridge::frb;
-
 use crate::api::MihomoTarget;
 
 use super::{ProxyMemberEntry, ProxyMemberSort};
 
 #[derive(Clone)]
-#[frb(ignore)]
 pub(super) struct CachedNode {
     pub(super) proxy_type: String,
     pub(super) delay: i32,
 }
 
-#[frb(ignore)]
 pub(super) struct CachedGroup {
     pub(super) members: Vec<usize>,
     sorted_members: Option<(ProxyMemberSort, Vec<usize>)>,
 }
 
-#[frb(ignore)]
 pub(super) struct CachedCatalog {
     pub(super) names: Vec<String>,
     pub(super) lower_names: Option<Vec<String>>,

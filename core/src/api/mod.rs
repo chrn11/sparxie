@@ -1,24 +1,20 @@
-//! Public Rust API exposed to Dart via flutter_rust_bridge.
+//! Public Rust API exposed to iOS via C ABI (see `crate::ios_ffi`).
 //!
 //! Each call takes a [`MihomoTarget`] (URL + optional secret) so the user can
 //! hot-switch between controllers without re-creating any state on the Rust
-//! side. JSON payloads are returned as raw strings so Dart can mirror the
-//! upstream mihomo schema directly. Server-side regex filters stay on the Rust
-//! side to keep the wire small for low-bandwidth remote controllers.
+//! side. JSON payloads are returned as raw strings so Swift can decode them
+//! directly. Server-side regex filters stay on the Rust side to keep the wire
+//! small for low-bandwidth remote controllers.
 //!
 //! Endpoints are split into one file per upstream URL prefix, mirroring
 //! mihomo's [`hub/route/`](https://github.com/MetaCubeX/mihomo/tree/Alpha/hub/route)
 //! layout.
 
-use flutter_rust_bridge::frb;
-
 use crate::MihomoError;
 use crate::client::MihomoClient;
 
-// frb's generated code references `crate::api::<endpoint>::<fn>` directly,
-// so each sub-module needs to be `pub`. The flat re-exports below remain so
-// downstream Rust callers (and codegen scanners) can also reach symbols via
-// `crate::api::*`.
+// Each sub-module is `pub` so downstream callers and the FFI layer can reach
+// symbols via `crate::api::*`.
 pub(crate) mod backend;
 pub mod cache;
 pub mod configs;
@@ -35,7 +31,7 @@ pub mod streams;
 pub mod upgrade;
 pub mod version;
 
-// Re-export every public fn so frb's `rust_input: crate::api` discovers them.
+// Re-export every public fn for convenience.
 pub use cache::*;
 pub use configs::*;
 pub use connections::*;
@@ -66,9 +62,11 @@ impl MihomoTarget {
     }
 }
 
-#[frb(init)]
+/// Initialize the application (starts the tokio runtime).
+/// The runtime is lazily created on first async call, so this is a no-op
+/// kept for API compatibility.
 pub fn init_app() {
-    flutter_rust_bridge::setup_default_user_utils();
+    // Runtime is lazily created via OnceLock in ios_ffi.
 }
 
 /// Percent-encode a path segment (we hit several mihomo endpoints with proxy

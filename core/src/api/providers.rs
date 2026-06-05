@@ -1,4 +1,5 @@
 use reqwest::Method;
+use serde::Serialize;
 use serde_json::Value;
 
 use crate::MihomoError;
@@ -7,22 +8,28 @@ use super::{MihomoTarget, urlencode};
 
 // ---------- proxy providers ----------------------------------------------
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProxyProviderEntry {
     pub name: String,
     pub vehicle_type: String,
-    pub proxies: u32,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub proxies: Vec<String>,
+    #[serde(skip_serializing_if = "String::is_empty", default)]
     pub updated_at: String,
     pub updatable: bool,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RuleProviderEntry {
     pub name: String,
     pub vehicle_type: String,
     pub behavior: String,
-    pub format: String,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub format: Option<String>,
     pub rule_count: u32,
+    #[serde(skip_serializing_if = "String::is_empty", default)]
     pub updated_at: String,
     pub updatable: bool,
 }
@@ -53,7 +60,11 @@ pub async fn proxy_provider_catalog(
             proxies: data
                 .get("proxies")
                 .and_then(Value::as_array)
-                .map(|items| items.len() as u32)
+                .map(|arr| {
+                    arr.iter()
+                        .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                        .collect()
+                })
                 .unwrap_or_default(),
             updatable: vehicle_type.eq_ignore_ascii_case("http"),
             vehicle_type,
@@ -114,7 +125,7 @@ pub async fn rule_provider_catalog(
         list.push(RuleProviderEntry {
             name: name.clone(),
             behavior: field_or(data, "behavior", ""),
-            format: field_or(data, "format", ""),
+            format: data.get("format").and_then(Value::as_str).map(|s| s.to_string()),
             rule_count: data.get("ruleCount").map(value_to_u32).unwrap_or_default(),
             updatable: vehicle_type.eq_ignore_ascii_case("http"),
             vehicle_type,

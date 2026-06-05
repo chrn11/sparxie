@@ -1,8 +1,8 @@
 use std::fmt;
 
 /// Errors crossing the FFI boundary. Variants are flat (no foreign types in
-/// fields) so flutter_rust_bridge can mirror this enum into Dart and Dart
-/// callers can `switch` on it instead of string-matching.
+/// fields) so Swift can decode the JSON representation directly instead of
+/// string-matching.
 #[derive(Debug, Clone)]
 pub enum MihomoError {
     InvalidUrl(String),

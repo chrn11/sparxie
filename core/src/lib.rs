@@ -1,4 +1,4 @@
-//! mihomo controller backend, exposed to Flutter via flutter_rust_bridge.
+//! mihomo controller backend, exposed to iOS via C ABI.
 
 mod assets;
 mod cache;
@@ -7,7 +7,6 @@ mod state;
 mod utils;
 
 pub mod api;
-
-mod frb_generated;
+pub mod ios_ffi;
 
 pub use utils::error::MihomoError;

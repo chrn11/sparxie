@@ -3,7 +3,6 @@ use futures_util::{StreamExt, stream};
 use crate::MihomoError;
 use crate::api::{MihomoTarget, urlencode};
 use crate::client::MihomoClient;
-use crate::frb_generated::StreamSink;
 
 use super::catalog::{ProxyMemberEntry, ProxyMemberSort};
 use super::catalog::{
@@ -115,73 +114,6 @@ pub async fn proxy_group_batch_delay(
         concurrency,
     )
     .await
-}
-
-/// Concurrent group delay test that emits each node as soon as it finishes.
-#[allow(clippy::too_many_arguments)]
-pub async fn proxy_group_delay_stream(
-    target: MihomoTarget,
-    group: String,
-    test_url: String,
-    timeout_ms: u32,
-    expected_status: Option<String>,
-    concurrency: u32,
-    member_sort: ProxyMemberSort,
-    window_offset: u32,
-    window_limit: u32,
-    window_members_hash: u32,
-    sink: StreamSink<ProxyDelayEvent>,
-) -> Result<(), MihomoError> {
-    let names = cached_group_member_names(target.clone(), &group).await?;
-    let client = target.client()?;
-    let concurrency = concurrency.clamp(1, 512) as usize;
-    let expected_status = expected_status.filter(|s| !s.is_empty());
-    let mut stream = stream::iter(names)
-        .map(|name| {
-            let client = &client;
-            let test_url = test_url.as_str();
-            let expected_status = expected_status.as_deref();
-            async move {
-                let delay =
-                    proxy_delay_with_client(client, &name, test_url, timeout_ms, expected_status)
-                        .await
-                        .unwrap_or_default();
-                ProxyDelayEntry { name, delay }
-            }
-        })
-        .buffer_unordered(concurrency);
-
-    while let Some(entry) = stream.next().await {
-        let Some((visible_delay, window_entries)) = update_cached_node_delay_window(
-            &target,
-            &group,
-            member_sort,
-            window_offset,
-            window_limit,
-            window_members_hash,
-            &entry.name,
-            entry.delay,
-        ) else {
-            continue;
-        };
-        if sink
-            .add(ProxyDelayEvent {
-                name: if visible_delay {
-                    entry.name
-                } else {
-                    String::new()
-                },
-                delay: if visible_delay { entry.delay } else { -1 },
-                window_offset,
-                window_members_hash,
-                window_entries,
-            })
-            .is_err()
-        {
-            break;
-        }
-    }
-    Ok(())
 }
 
 #[allow(clippy::too_many_arguments)]

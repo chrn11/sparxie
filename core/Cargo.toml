@@ -6,10 +6,10 @@ edition = "2024"
 [lib]
 name = "sparxie"
 path = "src/lib.rs"
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["staticlib"]
 
-# Release profile is tuned for binary size — the cdylib ships inside an
-# APK / app bundle, so a few extra build minutes on CI are well worth a
+# Release profile is tuned for binary size — the staticlib ships inside an
+# iOS app bundle, so a few extra build minutes on CI are well worth a
 # ~40% smaller native library.
 [profile.release]
 lto = "fat"
@@ -17,13 +17,13 @@ codegen-units = 1
 strip = true
 
 [dependencies]
-flutter_rust_bridge = "=2.12.0"
 anyhow = "1.0"
 blake3 = "1.8"
 futures-util = "0.3"
 http-body-util = "0.1"
 hyper = { version = "1", features = ["client", "http1"] }
 hyper-util = { version = "0.1", features = ["tokio"] }
+libc = "0.2"
 redb = "2"
 regex = "1.12"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
@@ -34,11 +34,3 @@ tokio = { version = "1.52", features = ["macros", "net", "rt-multi-thread", "syn
 tokio-stream = { version = "0.1", features = ["sync"] }
 tokio-tungstenite = { version = "0.29", default-features = false, features = ["connect", "rustls-tls-webpki-roots"] }
 url = "2.5"
-
-# Native icon resolver — only desktop resolves icons in Rust. Mobile either
-# resolves icons outside Rust (Android) or skips process icons/fonts (iOS), so
-# the desktop-only deps stay out of mobile cross-builds.
-[target.'cfg(any(target_os = "linux", target_os = "macos", target_os = "windows"))'.dependencies]
-file-icon = { git = "https://github.com/UruhaLushia/file-icon-rs", rev = "1a70444f17e47e0e7755f67a5e91a4c0664c78fe" }
-fontdb = "0.23"
-png = "0.18.1"

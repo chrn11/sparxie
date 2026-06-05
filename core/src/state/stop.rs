@@ -1,15 +1,11 @@
 //! Explicit stop signal for the per-target streaming loops.
 //!
-//! flutter_rust_bridge does not abort a Rust async task when Dart cancels the
-//! corresponding stream subscription — the spawned future runs to completion,
-//! and the only liveness signal is `sink.add()` failing. That works while
-//! frames flow (a live backend switch: the next frame's `add` fails, the
-//! wrapper drops its receiver, and the producer self-prunes). But a *dead*
-//! upstream (unreachable socket) produces no frames, so the wrapper parks on
-//! `stream.next()` forever and the producer retries the dead socket on a
-//! timer, spamming errors.
+//! When a controller is switched away from, its background streams (traffic,
+//! memory, connections, logs) need to be torn down promptly. A dead upstream
+//! produces no frames, so the wrapper would park on `stream.next()` forever and
+//! retry the dead socket on a timer.
 //!
-//! So Dart explicitly calls [`stop`] for a backend it's switching away from.
+//! The caller explicitly calls [`stop`] for a backend it's switching away from.
 //! Each producer captures its target's stop [`generation`] at start and bails
 //! once it differs. A global [`watch`] tick (race-free, unlike `Notify`) wakes
 //! producers blocked on a read or retry backoff so teardown is prompt.
