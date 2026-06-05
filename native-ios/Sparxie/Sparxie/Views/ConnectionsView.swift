@@ -6,7 +6,7 @@ struct ConnectionsView: View {
     @State private var searchText = ""
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List {
                 if let frame = session.connectionsFrame {
                     Section("活跃连接 (\(frame.activeCount))") {

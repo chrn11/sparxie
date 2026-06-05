@@ -7,7 +7,7 @@ struct SettingsView: View {
     @State private var showingCoreActions = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List {
                 // 当前控制器
                 Section("当前控制器") {
@@ -108,7 +108,7 @@ struct AddControllerView: View {
     @State private var allowInsecure = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
                 TextField("名称", text: $name)
                 TextField("地址（如 http://192.168.1.1:9090）", text: $baseUrl)

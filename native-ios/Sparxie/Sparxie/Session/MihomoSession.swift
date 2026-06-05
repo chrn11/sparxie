@@ -19,7 +19,7 @@ class MihomoSession: ObservableObject {
     @Published var errorMessage: String?
     @Published var isLoading = false
 
-    private var targetHandle: SparxieTargetHandle?
+    var targetHandle: SparxieTargetHandle?
     private var trafficTask: Task<Void, Never>?
     private var memoryTask: Task<Void, Never>?
     private var connectionsTask: Task<Void, Never>?
@@ -34,7 +34,7 @@ class MihomoSession: ObservableObject {
         // Clean up previous connection
         disconnect()
 
-        let handle = RustCore.shared.createTarget(
+        let handle = await RustCore.shared.createTarget(
             baseUrl: controller.baseUrl,
             secret: controller.secret,
             allowInsecure: controller.allowInsecure
@@ -67,10 +67,7 @@ class MihomoSession: ObservableObject {
     }
 
     func disconnect() {
-        if let handle = targetHandle {
-            RustCore.shared.stopTargetStreams(target: handle)
-            RustCore.shared.freeTarget(handle)
-        }
+        guard let handle = targetHandle else { return }
         targetHandle = nil
         trafficTask?.cancel()
         memoryTask?.cancel()
@@ -80,6 +77,10 @@ class MihomoSession: ObservableObject {
         memoryTask = nil
         connectionsTask = nil
         logsTask = nil
+        Task {
+            await RustCore.shared.stopTargetStreams(target: handle)
+            await RustCore.shared.freeTarget(handle)
+        }
     }
 
     // MARK: - Stream Subscriptions

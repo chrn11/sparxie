@@ -4,7 +4,7 @@ struct ResourcesView: View {
     @EnvironmentObject var session: MihomoSession
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List {
                 Section("代理订阅") {
                     ForEach(session.proxyProviders) { provider in

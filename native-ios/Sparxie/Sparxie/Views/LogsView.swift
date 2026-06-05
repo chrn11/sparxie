@@ -6,7 +6,7 @@ struct LogsView: View {
     @State private var autoScroll = true
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ScrollViewReader { proxy in
                 List(session.logEntries) { entry in
                     HStack(alignment: .top, spacing: 6) {

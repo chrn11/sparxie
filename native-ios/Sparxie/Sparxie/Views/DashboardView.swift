@@ -4,7 +4,7 @@ struct DashboardView: View {
     @EnvironmentObject var session: MihomoSession
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ScrollView {
                 VStack(spacing: 16) {
                     // 仪表盘概览卡片

@@ -12,7 +12,7 @@ struct ProxiesView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List(filteredGroups) { group in
                 NavigationLink(destination: ProxyGroupDetailView(group: group)) {
                     HStack {

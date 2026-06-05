@@ -6,7 +6,7 @@ struct RulesView: View {
     @State private var ruleEntries: [RuleEntry] = []
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List(ruleEntries) { rule in
                 VStack(alignment: .leading, spacing: 2) {
                     HStack {

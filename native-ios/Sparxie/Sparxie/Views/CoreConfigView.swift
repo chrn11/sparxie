@@ -6,7 +6,7 @@ struct CoreConfigView: View {
     @State private var isEditing = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             VStack {
                 if isEditing {
                     TextEditor(text: $configText)

@@ -7,7 +7,7 @@ struct CoreActionsView: View {
     @State private var isRestarting = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List {
                 Section("配置操作") {
                     Button(action: reloadConfig) {
