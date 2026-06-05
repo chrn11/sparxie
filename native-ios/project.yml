@@ -31,8 +31,9 @@ targets:
     sources:
       - path: Sparxie
         excludes:
-          - "Info.plist"
-          - ".DS_Store"
+          - "**/Info.plist"
+          - "**/Sparxie.entitlements"
+          - "**/.DS_Store"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sparxie.app
