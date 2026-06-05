@@ -5,6 +5,7 @@
 //! must free with `sparxie_free_string`). Async operations use callback function
 //! pointers. Stream operations use streaming callbacks with a `done` flag.
 
+use base64::Engine;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::sync::Arc;
@@ -322,7 +323,7 @@ pub unsafe extern "C" fn sparxie_proxy_group_members(
     };
     async_to_callback(
         || async move {
-            let members = api::proxies::proxy_group_members(target, &group, offset, limit, sort).await?;
+            let members = api::proxies::proxy_group_members(target, group, offset, limit, sort).await?;
             Ok(serde_json::to_string(&members)?)
         },
         callback,
@@ -722,7 +723,7 @@ pub unsafe extern "C" fn sparxie_fetch_connection_group_members(
     let group = cstr_to_string_or_empty(group);
     async_to_callback(
         || async move {
-            let conns = crate::state::connections::fetch_group_connections(target, interval_ms, &group, limit).await;
+            let conns = crate::state::connections::fetch_group_connections(target, interval_ms, group, limit).await;
             Ok(serde_json::to_string(&conns)?)
         },
         callback,
