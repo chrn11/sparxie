@@ -63,5 +63,3 @@ targets:
         BRIDGING_HEADER: Sparxie/Core/SparxieBridge.h
         ENABLE_BITCODE: NO
     dependencies: []
-    info:
-      path: Sparxie/Info.plist
