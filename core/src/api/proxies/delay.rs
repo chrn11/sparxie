@@ -11,7 +11,7 @@ use super::catalog::{
 };
 use super::value::value_to_i32;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize)]
 pub struct ProxyDelayEntry {
     pub name: String,
     pub delay: i32,

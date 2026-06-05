@@ -5,7 +5,7 @@ use super::proxies::catalog::update_cached_node_delays;
 use super::proxies::delay::proxy_group_batch_delay;
 use super::{MihomoTarget, urlencode};
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize)]
 pub struct GroupDelayEntry {
     pub name: String,
     pub delay: i32,

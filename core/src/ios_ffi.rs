@@ -213,7 +213,7 @@ pub unsafe extern "C" fn sparxie_version_info(
 ) {
     let target = unsafe { &(*target).inner }.clone();
     async_to_callback(
-        || async {
+        || async move {
             let info = api::version::version_info(target).await?;
             Ok(serde_json::to_string(&info)?)
         },
@@ -295,7 +295,7 @@ pub unsafe extern "C" fn sparxie_proxy_catalog(
     let target = unsafe { &(*target).inner }.clone();
     let filter = cstr_to_string_or_empty(filter);
     async_to_callback(
-        || async {
+        || async move {
             let catalog = api::proxies::proxy_catalog(target, include_hidden, filter).await?;
             Ok(serde_json::to_string(&catalog)?)
         },
@@ -321,7 +321,7 @@ pub unsafe extern "C" fn sparxie_proxy_group_members(
         _ => api::proxies::catalog::ProxyMemberSort::Original,
     };
     async_to_callback(
-        || async {
+        || async move {
             let members = api::proxies::proxy_group_members(target, &group, offset, limit, sort).await?;
             Ok(serde_json::to_string(&members)?)
         },
@@ -361,7 +361,7 @@ pub unsafe extern "C" fn sparxie_unfix_proxy(
     )
 }
 
-/// Test delay of a single proxy.
+/// Test delay of a single proxy. Returns the delay in ms as a JSON number string.
 #[no_mangle]
 pub unsafe extern "C" fn sparxie_proxy_delay(
     target: *const SparxieTarget,
@@ -376,7 +376,10 @@ pub unsafe extern "C" fn sparxie_proxy_delay(
     let test_url = cstr_to_string_or_empty(test_url);
     let expected_status = cstr_to_string(expected_status);
     async_to_callback(
-        || api::proxies::delay::proxy_delay(target, name, test_url, timeout_ms, expected_status),
+        || async move {
+            let delay = api::proxies::delay::proxy_delay(target, name, test_url, timeout_ms, expected_status).await?;
+            Ok(delay.to_string())
+        },
         callback,
     )
 }
@@ -398,7 +401,10 @@ pub unsafe extern "C" fn sparxie_proxy_batch_delay(
     let expected_status = cstr_to_string(expected_status);
     let names: Vec<String> = serde_json::from_str(&names_json).unwrap_or_default();
     async_to_callback(
-        || api::proxies::delay::proxy_batch_delay(target, names, test_url, timeout_ms, expected_status, concurrency),
+        || async move {
+            let entries = api::proxies::delay::proxy_batch_delay(target, names, test_url, timeout_ms, expected_status, concurrency).await?;
+            Ok(serde_json::to_string(&entries)?)
+        },
         callback,
     )
 }
@@ -419,7 +425,7 @@ pub unsafe extern "C" fn sparxie_proxy_group_delay(
     let test_url = cstr_to_string_or_empty(test_url);
     let expected_status = cstr_to_string(expected_status);
     async_to_callback(
-        || async {
+        || async move {
             let entries = api::proxies::delay::proxy_group_batch_delay(
                 target, group, test_url, timeout_ms, expected_status, concurrency,
             ).await?;
@@ -465,7 +471,7 @@ pub unsafe extern "C" fn sparxie_close_all_connections(
     async_unit_to_callback(|| api::connections::close_all_connections(target), callback)
 }
 
-/// Close connections by chain.
+/// Close connections by chain. Returns count of closed connections as JSON number string.
 #[no_mangle]
 pub unsafe extern "C" fn sparxie_close_connections_by_chain(
     target: *const SparxieTarget,
@@ -475,12 +481,15 @@ pub unsafe extern "C" fn sparxie_close_connections_by_chain(
     let target = unsafe { &(*target).inner }.clone();
     let chain = cstr_to_string_or_empty(chain);
     async_to_callback(
-        || api::connections::close_connections_by_chain(target, chain),
+        || async move {
+            let count = api::connections::close_connections_by_chain(target, chain).await?;
+            Ok(count.to_string())
+        },
         callback,
     )
 }
 
-/// Close connections by group.
+/// Close connections by group. Returns count of closed connections as JSON number string.
 #[no_mangle]
 pub unsafe extern "C" fn sparxie_close_connections_by_group(
     target: *const SparxieTarget,
@@ -490,7 +499,10 @@ pub unsafe extern "C" fn sparxie_close_connections_by_group(
     let target = unsafe { &(*target).inner }.clone();
     let group = cstr_to_string_or_empty(group);
     async_to_callback(
-        || api::connections::close_connections_by_group(target, group),
+        || async move {
+            let count = api::connections::close_connections_by_group(target, group).await?;
+            Ok(count.to_string())
+        },
         callback,
     )
 }
@@ -661,7 +673,7 @@ pub unsafe extern "C" fn sparxie_fetch_connection_window(
         _ => crate::state::connections::ConnectionsListKind::Active,
     };
     async_to_callback(
-        || async {
+        || async move {
             let conns = crate::state::connections::fetch_window(target, interval_ms, kind, offset, limit).await;
             Ok(serde_json::to_string(&conns)?)
         },
@@ -689,7 +701,7 @@ pub unsafe extern "C" fn sparxie_fetch_connection_groups(
         _ => crate::state::connections::ConnectionGroupSort::Name,
     };
     async_to_callback(
-        || async {
+        || async move {
             let groups = crate::state::connections::fetch_groups(target, interval_ms, sort, asc).await;
             Ok(serde_json::to_string(&groups)?)
         },
@@ -709,7 +721,7 @@ pub unsafe extern "C" fn sparxie_fetch_connection_group_members(
     let target = unsafe { &(*target).inner }.clone();
     let group = cstr_to_string_or_empty(group);
     async_to_callback(
-        || async {
+        || async move {
             let conns = crate::state::connections::fetch_group_connections(target, interval_ms, &group, limit).await;
             Ok(serde_json::to_string(&conns)?)
         },
@@ -770,7 +782,7 @@ pub unsafe extern "C" fn sparxie_rules_count(
 ) {
     let target = unsafe { &(*target).inner }.clone();
     async_to_callback(
-        || async {
+        || async move {
             let count = api::rules::rules_count(target).await;
             Ok(count.to_string())
         },
@@ -788,7 +800,7 @@ pub unsafe extern "C" fn sparxie_rules_load(
     let target = unsafe { &(*target).inner }.clone();
     let filter = cstr_to_string_or_empty(filter);
     async_to_callback(
-        || async {
+        || async move {
             let summary = api::rules::rules_load(target, filter).await?;
             Ok(serde_json::to_string(&summary)?)
         },
@@ -806,7 +818,7 @@ pub unsafe extern "C" fn sparxie_rules_set_filter(
     let target = unsafe { &(*target).inner }.clone();
     let filter = cstr_to_string_or_empty(filter);
     async_to_callback(
-        || async {
+        || async move {
             let summary = api::rules::rules_set_filter(target, filter).await;
             Ok(serde_json::to_string(&summary)?)
         },
@@ -824,7 +836,7 @@ pub unsafe extern "C" fn sparxie_rules_window(
 ) {
     let target = unsafe { &(*target).inner }.clone();
     async_to_callback(
-        || async {
+        || async move {
             let rules = api::rules::rules_window(target, offset, limit).await;
             Ok(serde_json::to_string(&rules)?)
         },
@@ -1029,8 +1041,8 @@ pub unsafe extern "C" fn sparxie_group_delay(
     let test_url = cstr_to_string_or_empty(test_url);
     let expected_status = cstr_to_string(expected_status);
     async_to_callback(
-        || async {
-            let entries = api::groups::group_delay(target, group, test_url, timeout_ms, expected_status, concurrency).await?;
+        || async move {
+            let entries = api::groups::group_delay(target, group, test_url, timeout_ms, expected_status, Some(concurrency)).await?;
             Ok(serde_json::to_string(&entries)?)
         },
         callback,
@@ -1057,7 +1069,7 @@ pub unsafe extern "C" fn sparxie_proxy_provider_catalog(
 ) {
     let target = unsafe { &(*target).inner }.clone();
     async_to_callback(
-        || async {
+        || async move {
             let catalog = api::providers::proxy_provider_catalog(target).await?;
             Ok(serde_json::to_string(&catalog)?)
         },
@@ -1109,7 +1121,7 @@ pub unsafe extern "C" fn sparxie_rule_provider_catalog(
 ) {
     let target = unsafe { &(*target).inner }.clone();
     async_to_callback(
-        || async {
+        || async move {
             let catalog = api::providers::rule_provider_catalog(target).await?;
             Ok(serde_json::to_string(&catalog)?)
         },
@@ -1170,34 +1182,32 @@ pub unsafe extern "C" fn sparxie_proxy_detail(
 // Icons
 // ---------------------------------------------------------------------------
 
+/// Fetch an icon by URL. Returns base64-encoded image bytes as JSON string.
 #[no_mangle]
 pub unsafe extern "C" fn sparxie_fetch_icon(
-    target: *const SparxieTarget,
+    _target: *const SparxieTarget,
     url: *const c_char,
     callback: SparxieCallback,
 ) {
-    let target = unsafe { &(*target).inner }.clone();
     let url = cstr_to_string_or_empty(url);
     async_to_callback(
-        || api::icons::fetch_icon(target, url),
+        || async move {
+            let bytes = api::icons::fetch_icon(url).await?;
+            Ok(base64::engine::general_purpose::STANDARD.encode(&bytes))
+        },
         callback,
     )
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn sparxie_icon_cache_size(callback: SparxieCallback) {
-    runtime().spawn(async move {
-        match api::icons::icon_cache_size().await {
-            Ok(size) => {
-                let result = CString::new(size.to_string()).unwrap_or_default();
-                unsafe { callback(result.as_ptr(), std::ptr::null()); }
-            }
-            Err(e) => {
-                let err = CString::new(e.to_string()).unwrap_or_default();
-                unsafe { callback(std::ptr::null(), err.as_ptr()); }
-            }
-        }
-    });
+    async_to_callback(
+        || async move {
+            let size = api::icons::icon_cache_size().await?;
+            Ok(size.to_string())
+        },
+        callback,
+    )
 }
 
 #[no_mangle]
@@ -1211,11 +1221,10 @@ pub unsafe extern "C" fn sparxie_clear_icon_cache(callback: SparxieCallback) {
 
 #[no_mangle]
 pub unsafe extern "C" fn sparxie_system_font_families(callback: SparxieCallback) {
-    async_to_callback(
-        || async {
-            let fonts = api::fonts::system_font_families().await?;
-            Ok(serde_json::to_string(&fonts)?)
-        },
-        callback,
-    )
+    runtime().spawn(async move {
+        let fonts = api::fonts::system_font_families().await;
+        let json = serde_json::to_string(&fonts).unwrap_or_else(|_| "[]".to_string());
+        let c_result = CString::new(json).unwrap_or_default();
+        unsafe { callback(c_result.as_ptr(), std::ptr::null()); }
+    });
 }
