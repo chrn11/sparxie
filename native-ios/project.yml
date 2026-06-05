@@ -39,6 +39,7 @@ targets:
         PRODUCT_NAME: Sparxie
         DISPLAY_NAME: Sparxie
         INFOPLIST_FILE: Sparxie/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
         CODE_SIGN_ENTITLEMENTS: Sparxie/Sparxie.entitlements
         HEADER_SEARCH_PATHS:
           - "$(SRCROOT)/Sparxie/Core"
