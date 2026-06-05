@@ -126,7 +126,7 @@ fn cstr_to_string_or_empty(ptr: *const c_char) -> String {
 /// Free a string previously returned by any `sparxie_*` function.
 /// Passing null is a no-op.
 #[no_mangle]
-pub extern "C" fn sparxie_free_string(s: *mut c_char) {
+pub unsafe extern "C" fnsparxie_free_string(s: *mut c_char) {
     if !s.is_null() {
         unsafe { drop(CString::from_raw(s)); }
     }
@@ -140,14 +140,14 @@ pub extern "C" fn sparxie_free_string(s: *mut c_char) {
 /// The runtime is lazily created on first async call, so this is a no-op
 /// kept for API compatibility.
 #[no_mangle]
-pub extern "C" fn sparxie_init_app() {
+pub unsafe extern "C" fnsparxie_init_app() {
     // Runtime is lazily created via OnceLock.
 }
 
 /// Initialize the icon cache directory.
 /// Returns 0 on success, -1 on error.
 #[no_mangle]
-pub extern "C" fn sparxie_init_cache(cache_dir: *const c_char) -> i32 {
+pub unsafe extern "C" fnsparxie_init_cache(cache_dir: *const c_char) -> i32 {
     let dir = cstr_to_string_or_empty(cache_dir);
     match crate::api::icons::init_cache(dir) {
         Ok(()) => 0,
@@ -163,7 +163,7 @@ pub extern "C" fn sparxie_init_cache(cache_dir: *const c_char) -> i32 {
 /// `secret` may be null for unauthenticated backends.
 /// Returns an opaque pointer; free with `sparxie_target_free`.
 #[no_mangle]
-pub extern "C" fn sparxie_target_create(
+pub unsafe extern "C" fnsparxie_target_create(
     base_url: *const c_char,
     secret: *const c_char,
     allow_insecure: bool,
@@ -182,7 +182,7 @@ pub extern "C" fn sparxie_target_create(
 
 /// Free a target handle.
 #[no_mangle]
-pub extern "C" fn sparxie_target_free(target: *mut SparxieTarget) {
+pub unsafe extern "C" fnsparxie_target_free(target: *mut SparxieTarget) {
     if !target.is_null() {
         unsafe { drop(Box::from_raw(target)); }
     }
@@ -194,7 +194,7 @@ pub extern "C" fn sparxie_target_free(target: *mut SparxieTarget) {
 
 /// Get the mihomo backend version string.
 #[no_mangle]
-pub extern "C" fn sparxie_version(
+pub unsafe extern "C" fnsparxie_version(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -207,7 +207,7 @@ pub extern "C" fn sparxie_version(
 
 /// Get detailed version information as JSON.
 #[no_mangle]
-pub extern "C" fn sparxie_version_info(
+pub unsafe extern "C" fnsparxie_version_info(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -227,7 +227,7 @@ pub extern "C" fn sparxie_version_info(
 
 /// Upgrade core.
 #[no_mangle]
-pub extern "C" fn sparxie_upgrade_core(
+pub unsafe extern "C" fnsparxie_upgrade_core(
     target: *const SparxieTarget,
     channel: *const c_char,
     force: bool,
@@ -243,7 +243,7 @@ pub extern "C" fn sparxie_upgrade_core(
 
 /// Upgrade UI.
 #[no_mangle]
-pub extern "C" fn sparxie_upgrade_ui(
+pub unsafe extern "C" fnsparxie_upgrade_ui(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -256,7 +256,7 @@ pub extern "C" fn sparxie_upgrade_ui(
 
 /// Upgrade Geo data.
 #[no_mangle]
-pub extern "C" fn sparxie_upgrade_geo(
+pub unsafe extern "C" fnsparxie_upgrade_geo(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -269,7 +269,7 @@ pub extern "C" fn sparxie_upgrade_geo(
 
 /// Restart core.
 #[no_mangle]
-pub extern "C" fn sparxie_restart_core(
+pub unsafe extern "C" fnsparxie_restart_core(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -286,7 +286,7 @@ pub extern "C" fn sparxie_restart_core(
 
 /// Get proxy catalog as JSON.
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_catalog(
+pub unsafe extern "C" fnsparxie_proxy_catalog(
     target: *const SparxieTarget,
     include_hidden: bool,
     filter: *const c_char,
@@ -305,7 +305,7 @@ pub extern "C" fn sparxie_proxy_catalog(
 
 /// Get proxy group members (paged).
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_group_members(
+pub unsafe extern "C" fnsparxie_proxy_group_members(
     target: *const SparxieTarget,
     group: *const c_char,
     offset: u32,
@@ -331,7 +331,7 @@ pub extern "C" fn sparxie_proxy_group_members(
 
 /// Select a proxy in a group.
 #[no_mangle]
-pub extern "C" fn sparxie_select_proxy(
+pub unsafe extern "C" fnsparxie_select_proxy(
     target: *const SparxieTarget,
     group: *const c_char,
     name: *const c_char,
@@ -348,7 +348,7 @@ pub extern "C" fn sparxie_select_proxy(
 
 /// Unfix (unset sticky) a proxy.
 #[no_mangle]
-pub extern "C" fn sparxie_unfix_proxy(
+pub unsafe extern "C" fnsparxie_unfix_proxy(
     target: *const SparxieTarget,
     name: *const c_char,
     callback: SparxieCallback,
@@ -363,7 +363,7 @@ pub extern "C" fn sparxie_unfix_proxy(
 
 /// Test delay of a single proxy.
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_delay(
+pub unsafe extern "C" fnsparxie_proxy_delay(
     target: *const SparxieTarget,
     name: *const c_char,
     test_url: *const c_char,
@@ -383,7 +383,7 @@ pub extern "C" fn sparxie_proxy_delay(
 
 /// Batch delay test for multiple proxies.
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_batch_delay(
+pub unsafe extern "C" fnsparxie_proxy_batch_delay(
     target: *const SparxieTarget,
     names_json: *const c_char,
     test_url: *const c_char,
@@ -405,7 +405,7 @@ pub extern "C" fn sparxie_proxy_batch_delay(
 
 /// Batch delay test for a single group.
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_group_delay(
+pub unsafe extern "C" fnsparxie_proxy_group_delay(
     target: *const SparxieTarget,
     group: *const c_char,
     test_url: *const c_char,
@@ -435,7 +435,7 @@ pub extern "C" fn sparxie_proxy_group_delay(
 
 /// Get all connections as JSON.
 #[no_mangle]
-pub extern "C" fn sparxie_connections(
+pub unsafe extern "C" fnsparxie_connections(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -445,7 +445,7 @@ pub extern "C" fn sparxie_connections(
 
 /// Close a single connection.
 #[no_mangle]
-pub extern "C" fn sparxie_close_connection(
+pub unsafe extern "C" fnsparxie_close_connection(
     target: *const SparxieTarget,
     id: *const c_char,
     callback: SparxieCallback,
@@ -457,7 +457,7 @@ pub extern "C" fn sparxie_close_connection(
 
 /// Close all connections.
 #[no_mangle]
-pub extern "C" fn sparxie_close_all_connections(
+pub unsafe extern "C" fnsparxie_close_all_connections(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -467,7 +467,7 @@ pub extern "C" fn sparxie_close_all_connections(
 
 /// Close connections by chain.
 #[no_mangle]
-pub extern "C" fn sparxie_close_connections_by_chain(
+pub unsafe extern "C" fnsparxie_close_connections_by_chain(
     target: *const SparxieTarget,
     chain: *const c_char,
     callback: SparxieCallback,
@@ -482,7 +482,7 @@ pub extern "C" fn sparxie_close_connections_by_chain(
 
 /// Close connections by group.
 #[no_mangle]
-pub extern "C" fn sparxie_close_connections_by_group(
+pub unsafe extern "C" fnsparxie_close_connections_by_group(
     target: *const SparxieTarget,
     group: *const c_char,
     callback: SparxieCallback,
@@ -501,7 +501,7 @@ pub extern "C" fn sparxie_close_connections_by_group(
 
 /// Subscribe to traffic updates. Each callback delivers a JSON `TrafficSample`.
 #[no_mangle]
-pub extern "C" fn sparxie_traffic_stream(
+pub unsafe extern "C" fnsparxie_traffic_stream(
     target: *const SparxieTarget,
     callback: SparxieStreamCallback,
 ) {
@@ -533,7 +533,7 @@ pub extern "C" fn sparxie_traffic_stream(
 
 /// Subscribe to memory usage updates. Each callback delivers a JSON `MemorySample`.
 #[no_mangle]
-pub extern "C" fn sparxie_memory_stream(
+pub unsafe extern "C" fnsparxie_memory_stream(
     target: *const SparxieTarget,
     callback: SparxieStreamCallback,
 ) {
@@ -564,7 +564,7 @@ pub extern "C" fn sparxie_memory_stream(
 
 /// Subscribe to log entries. Each callback delivers a JSON array of `LogEntry`.
 #[no_mangle]
-pub extern "C" fn sparxie_logs_stream(
+pub unsafe extern "C" fnsparxie_logs_stream(
     target: *const SparxieTarget,
     level: *const c_char,
     callback: SparxieStreamCallback,
@@ -603,7 +603,7 @@ pub extern "C" fn sparxie_logs_stream(
 
 /// Clear cached log entries for the given level.
 #[no_mangle]
-pub extern "C" fn sparxie_clear_logs(
+pub unsafe extern "C" fnsparxie_clear_logs(
     target: *const SparxieTarget,
     level: *const c_char,
 ) {
@@ -616,7 +616,7 @@ pub extern "C" fn sparxie_clear_logs(
 
 /// Subscribe to connection frame updates. Each callback delivers JSON `ConnectionsFrame`.
 #[no_mangle]
-pub extern "C" fn sparxie_connections_stream(
+pub unsafe extern "C" fnsparxie_connections_stream(
     target: *const SparxieTarget,
     interval_ms: u32,
     callback: SparxieStreamCallback,
@@ -647,7 +647,7 @@ pub extern "C" fn sparxie_connections_stream(
 
 /// Fetch a window of connections.
 #[no_mangle]
-pub extern "C" fn sparxie_fetch_connection_window(
+pub unsafe extern "C" fnsparxie_fetch_connection_window(
     target: *const SparxieTarget,
     interval_ms: u32,
     kind: i32,
@@ -671,7 +671,7 @@ pub extern "C" fn sparxie_fetch_connection_window(
 
 /// Fetch connection groups.
 #[no_mangle]
-pub extern "C" fn sparxie_fetch_connection_groups(
+pub unsafe extern "C" fnsparxie_fetch_connection_groups(
     target: *const SparxieTarget,
     interval_ms: u32,
     sort: i32,
@@ -699,7 +699,7 @@ pub extern "C" fn sparxie_fetch_connection_groups(
 
 /// Fetch connections in a group.
 #[no_mangle]
-pub extern "C" fn sparxie_fetch_connection_group_members(
+pub unsafe extern "C" fnsparxie_fetch_connection_group_members(
     target: *const SparxieTarget,
     interval_ms: u32,
     group: *const c_char,
@@ -719,7 +719,7 @@ pub extern "C" fn sparxie_fetch_connection_group_members(
 
 /// Set connections sort order.
 #[no_mangle]
-pub extern "C" fn sparxie_set_connections_sort(
+pub unsafe extern "C" fnsparxie_set_connections_sort(
     target: *const SparxieTarget,
     interval_ms: u32,
     sort: i32,
@@ -741,7 +741,7 @@ pub extern "C" fn sparxie_set_connections_sort(
 
 /// Clear closed connections.
 #[no_mangle]
-pub extern "C" fn sparxie_clear_closed_connections(
+pub unsafe extern "C" fnsparxie_clear_closed_connections(
     target: *const SparxieTarget,
     interval_ms: u32,
 ) {
@@ -753,7 +753,7 @@ pub extern "C" fn sparxie_clear_closed_connections(
 
 /// Stop all streams for a target.
 #[no_mangle]
-pub extern "C" fn sparxie_stop_target_streams(target: *const SparxieTarget) {
+pub unsafe extern "C" fnsparxie_stop_target_streams(target: *const SparxieTarget) {
     let target = unsafe { &(*target).inner };
     stop::stop(target);
 }
@@ -764,7 +764,7 @@ pub extern "C" fn sparxie_stop_target_streams(target: *const SparxieTarget) {
 
 /// Get total rule count.
 #[no_mangle]
-pub extern "C" fn sparxie_rules_count(
+pub unsafe extern "C" fnsparxie_rules_count(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -780,7 +780,7 @@ pub extern "C" fn sparxie_rules_count(
 
 /// Load rules with a filter string.
 #[no_mangle]
-pub extern "C" fn sparxie_rules_load(
+pub unsafe extern "C" fnsparxie_rules_load(
     target: *const SparxieTarget,
     filter: *const c_char,
     callback: SparxieCallback,
@@ -798,7 +798,7 @@ pub extern "C" fn sparxie_rules_load(
 
 /// Set filter and get summary.
 #[no_mangle]
-pub extern "C" fn sparxie_rules_set_filter(
+pub unsafe extern "C" fnsparxie_rules_set_filter(
     target: *const SparxieTarget,
     filter: *const c_char,
     callback: SparxieCallback,
@@ -816,7 +816,7 @@ pub extern "C" fn sparxie_rules_set_filter(
 
 /// Get a window of rules.
 #[no_mangle]
-pub extern "C" fn sparxie_rules_window(
+pub unsafe extern "C" fnsparxie_rules_window(
     target: *const SparxieTarget,
     offset: u32,
     limit: u32,
@@ -834,7 +834,7 @@ pub extern "C" fn sparxie_rules_window(
 
 /// Disable rules by index.
 #[no_mangle]
-pub extern "C" fn sparxie_rules_disable(
+pub unsafe extern "C" fnsparxie_rules_disable(
     target: *const SparxieTarget,
     indices_json: *const c_char,
     callback: SparxieCallback,
@@ -853,7 +853,7 @@ pub extern "C" fn sparxie_rules_disable(
 
 /// Get configs as JSON.
 #[no_mangle]
-pub extern "C" fn sparxie_configs(
+pub unsafe extern "C" fnsparxie_configs(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -863,7 +863,7 @@ pub extern "C" fn sparxie_configs(
 
 /// Get config mode.
 #[no_mangle]
-pub extern "C" fn sparxie_config_mode(
+pub unsafe extern "C" fnsparxie_config_mode(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -873,7 +873,7 @@ pub extern "C" fn sparxie_config_mode(
 
 /// Patch configs.
 #[no_mangle]
-pub extern "C" fn sparxie_patch_configs(
+pub unsafe extern "C" fnsparxie_patch_configs(
     target: *const SparxieTarget,
     body_json: *const c_char,
     callback: SparxieCallback,
@@ -888,7 +888,7 @@ pub extern "C" fn sparxie_patch_configs(
 
 /// Reload configs.
 #[no_mangle]
-pub extern "C" fn sparxie_reload_configs(
+pub unsafe extern "C" fnsparxie_reload_configs(
     target: *const SparxieTarget,
     path: *const c_char,
     payload: *const c_char,
@@ -906,7 +906,7 @@ pub extern "C" fn sparxie_reload_configs(
 
 /// Update Geo data.
 #[no_mangle]
-pub extern "C" fn sparxie_update_geo(
+pub unsafe extern "C" fnsparxie_update_geo(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -919,7 +919,7 @@ pub extern "C" fn sparxie_update_geo(
 // ---------------------------------------------------------------------------
 
 #[no_mangle]
-pub extern "C" fn sparxie_storage_get(
+pub unsafe extern "C" fnsparxie_storage_get(
     target: *const SparxieTarget,
     key: *const c_char,
     callback: SparxieCallback,
@@ -930,7 +930,7 @@ pub extern "C" fn sparxie_storage_get(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_storage_set(
+pub unsafe extern "C" fnsparxie_storage_set(
     target: *const SparxieTarget,
     key: *const c_char,
     value_json: *const c_char,
@@ -946,7 +946,7 @@ pub extern "C" fn sparxie_storage_set(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_storage_delete(
+pub unsafe extern "C" fnsparxie_storage_delete(
     target: *const SparxieTarget,
     key: *const c_char,
     callback: SparxieCallback,
@@ -964,7 +964,7 @@ pub extern "C" fn sparxie_storage_delete(
 // ---------------------------------------------------------------------------
 
 #[no_mangle]
-pub extern "C" fn sparxie_dns_query(
+pub unsafe extern "C" fnsparxie_dns_query(
     target: *const SparxieTarget,
     name: *const c_char,
     record_type: *const c_char,
@@ -984,7 +984,7 @@ pub extern "C" fn sparxie_dns_query(
 // ---------------------------------------------------------------------------
 
 #[no_mangle]
-pub extern "C" fn sparxie_flush_fakeip(
+pub unsafe extern "C" fnsparxie_flush_fakeip(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -993,7 +993,7 @@ pub extern "C" fn sparxie_flush_fakeip(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_flush_dns(
+pub unsafe extern "C" fnsparxie_flush_dns(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -1006,7 +1006,7 @@ pub extern "C" fn sparxie_flush_dns(
 // ---------------------------------------------------------------------------
 
 #[no_mangle]
-pub extern "C" fn sparxie_groups(
+pub unsafe extern "C" fnsparxie_groups(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -1015,7 +1015,7 @@ pub extern "C" fn sparxie_groups(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_group_delay(
+pub unsafe extern "C" fnsparxie_group_delay(
     target: *const SparxieTarget,
     group: *const c_char,
     test_url: *const c_char,
@@ -1042,7 +1042,7 @@ pub extern "C" fn sparxie_group_delay(
 // ---------------------------------------------------------------------------
 
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_providers(
+pub unsafe extern "C" fnsparxie_proxy_providers(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -1051,7 +1051,7 @@ pub extern "C" fn sparxie_proxy_providers(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_provider_catalog(
+pub unsafe extern "C" fnsparxie_proxy_provider_catalog(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -1066,7 +1066,7 @@ pub extern "C" fn sparxie_proxy_provider_catalog(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_provider_update(
+pub unsafe extern "C" fnsparxie_proxy_provider_update(
     target: *const SparxieTarget,
     name: *const c_char,
     callback: SparxieCallback,
@@ -1080,7 +1080,7 @@ pub extern "C" fn sparxie_proxy_provider_update(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_provider_healthcheck(
+pub unsafe extern "C" fnsparxie_proxy_provider_healthcheck(
     target: *const SparxieTarget,
     name: *const c_char,
     callback: SparxieCallback,
@@ -1094,7 +1094,7 @@ pub extern "C" fn sparxie_proxy_provider_healthcheck(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_rule_providers(
+pub unsafe extern "C" fnsparxie_rule_providers(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -1103,7 +1103,7 @@ pub extern "C" fn sparxie_rule_providers(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_rule_provider_catalog(
+pub unsafe extern "C" fnsparxie_rule_provider_catalog(
     target: *const SparxieTarget,
     callback: SparxieCallback,
 ) {
@@ -1118,7 +1118,7 @@ pub extern "C" fn sparxie_rule_provider_catalog(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_rule_provider_update(
+pub unsafe extern "C" fnsparxie_rule_provider_update(
     target: *const SparxieTarget,
     name: *const c_char,
     callback: SparxieCallback,
@@ -1136,7 +1136,7 @@ pub extern "C" fn sparxie_rule_provider_update(
 // ---------------------------------------------------------------------------
 
 #[no_mangle]
-pub extern "C" fn sparxie_proxies(
+pub unsafe extern "C" fnsparxie_proxies(
     target: *const SparxieTarget,
     name_pattern: *const c_char,
     type_pattern: *const c_char,
@@ -1153,7 +1153,7 @@ pub extern "C" fn sparxie_proxies(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_proxy_detail(
+pub unsafe extern "C" fnsparxie_proxy_detail(
     target: *const SparxieTarget,
     name: *const c_char,
     callback: SparxieCallback,
@@ -1171,7 +1171,7 @@ pub extern "C" fn sparxie_proxy_detail(
 // ---------------------------------------------------------------------------
 
 #[no_mangle]
-pub extern "C" fn sparxie_fetch_icon(
+pub unsafe extern "C" fnsparxie_fetch_icon(
     target: *const SparxieTarget,
     url: *const c_char,
     callback: SparxieCallback,
@@ -1185,7 +1185,7 @@ pub extern "C" fn sparxie_fetch_icon(
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_icon_cache_size(callback: SparxieCallback) {
+pub unsafe extern "C" fnsparxie_icon_cache_size(callback: SparxieCallback) {
     runtime().spawn(async move {
         match api::icons::icon_cache_size().await {
             Ok(size) => {
@@ -1201,7 +1201,7 @@ pub extern "C" fn sparxie_icon_cache_size(callback: SparxieCallback) {
 }
 
 #[no_mangle]
-pub extern "C" fn sparxie_clear_icon_cache(callback: SparxieCallback) {
+pub unsafe extern "C" fnsparxie_clear_icon_cache(callback: SparxieCallback) {
     async_unit_to_callback(|| api::icons::clear_icon_cache(), callback)
 }
 
@@ -1210,7 +1210,7 @@ pub extern "C" fn sparxie_clear_icon_cache(callback: SparxieCallback) {
 // ---------------------------------------------------------------------------
 
 #[no_mangle]
-pub extern "C" fn sparxie_system_font_families(callback: SparxieCallback) {
+pub unsafe extern "C" fnsparxie_system_font_families(callback: SparxieCallback) {
     async_to_callback(
         || async {
             let fonts = api::fonts::system_font_families().await?;
