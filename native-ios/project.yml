@@ -31,19 +31,21 @@ targets:
     sources:
       - path: Sparxie
         excludes:
-          - "**/Info.plist"
-          - "**/Sparxie.entitlements"
           - "**/.DS_Store"
+          - "**/Sparxie.entitlements"
+          - "**/Info.plist"
+      - path: Sparxie/Sparxie/Info.plist
+        buildPhase: none
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sparxie.app
         PRODUCT_NAME: Sparxie
         DISPLAY_NAME: Sparxie
-        INFOPLIST_FILE: Sparxie/Info.plist
+        INFOPLIST_FILE: Sparxie/Sparxie/Info.plist
         GENERATE_INFOPLIST_FILE: NO
-        CODE_SIGN_ENTITLEMENTS: Sparxie/Sparxie.entitlements
+        CODE_SIGN_ENTITLEMENTS: Sparxie/Sparxie/Sparxie.entitlements
         HEADER_SEARCH_PATHS:
-          - "$(SRCROOT)/Sparxie/Core"
+          - "$(SRCROOT)/Sparxie/Sparxie/Core"
           - "$(SRCROOT)/../core/target/aarch64-apple-ios/release"
         LIBRARY_SEARCH_PATHS:
           - "$(SRCROOT)/../core/target/aarch64-apple-ios/release"
@@ -62,6 +64,6 @@ targets:
           - "Combine"
         GCC_PREPROCESSOR_DEFINITIONS:
           - "SPARXIE_IOS=1"
-        BRIDGING_HEADER: Sparxie/Core/SparxieBridge.h
+        BRIDGING_HEADER: Sparxie/Sparxie/Core/SparxieBridge.h
         ENABLE_BITCODE: NO
     dependencies: []
